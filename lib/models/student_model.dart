@@ -8,7 +8,7 @@ class StudentModel {
     this.phone,
   });
 
-  StudentModel.fromJson(dynamic json) {
+  StudentModel.fromMap(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     age = json['age'];
