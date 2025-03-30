@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 class StudentModel {
   StudentModel({
     this.id,
@@ -6,6 +8,7 @@ class StudentModel {
     this.address,
     this.major,
     this.phone,
+    this.photo,
   });
 
   StudentModel.fromMap(Map<String, dynamic> json) {
@@ -15,6 +18,7 @@ class StudentModel {
     address = json['address'];
     major = json['major'];
     phone = json['phone'];
+    photo = json['photo'];
   }
   int? id;
   String? name;
@@ -22,22 +26,8 @@ class StudentModel {
   String? address;
   String? major;
   String? phone;
-  StudentModel copyWith({
-    int? id,
-    String? name,
-    int? age,
-    String? address,
-    String? major,
-    String? phone,
-  }) =>
-      StudentModel(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        age: age ?? this.age,
-        address: address ?? this.address,
-        major: major ?? this.major,
-        phone: phone ?? this.phone,
-      );
+  Uint8List? photo;
+
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['id'] = id;
@@ -46,6 +36,7 @@ class StudentModel {
     map['address'] = address;
     map['major'] = major;
     map['phone'] = phone;
+    map['photo'] = photo;
     return map;
   }
 }

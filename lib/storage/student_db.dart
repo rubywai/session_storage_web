@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:lessoon_storage/models/student_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -12,7 +13,12 @@ class StudentDatabase {
     String dbPath = "${directory.path}/student.db";
     final database = await openDatabase(
       dbPath,
-      version: 1,
+      version: 4,
+      onUpgrade: (db, oldVersion, newVersion) {
+        Future(() {
+          db.execute("alter table $_studentTable add column photo blob");
+        });
+      },
     );
     _db = database;
     return database;
@@ -20,7 +26,7 @@ class StudentDatabase {
 
   static Future<void> createStudentTable() {
     return _db.execute(
-        "create table if not exists $_studentTable (id integer primary key autoincrement,name text,age integer,address text,major text,phone text)");
+        "create table if not exists $_studentTable (id integer primary key autoincrement,name text,age integer,address text,major text,phone text,photo blob)");
   }
 
   static Future<void> insertStudent({
@@ -29,13 +35,25 @@ class StudentDatabase {
     required String address,
     required String major,
     required String phone,
+    required Uint8List? photo,
   }) {
-    return _db.execute(
-        'insert into $_studentTable (name,age,address,major,phone) values ("$name",$age,"$address","$major","$phone")');
+    return _db.rawInsert(
+      'insert into $_studentTable (name,age,address,major,phone,photo) values (?,?,?,?,?,?)',
+      [name, age, address, major, phone, photo],
+    );
   }
 
   static Future<List<StudentModel>> getAllStudents() async {
     final rawResult = await _db.rawQuery("select * from $_studentTable");
+    return rawResult.map((e) {
+      return StudentModel.fromMap(e);
+    }).toList();
+  }
+
+  static Future<List<StudentModel>> getAllStudentsByAddress(
+      String address) async {
+    final rawResult = await _db
+        .rawQuery('select * from $_studentTable where address="$address"');
     return rawResult.map((e) {
       return StudentModel.fromMap(e);
     }).toList();
@@ -46,7 +64,17 @@ class StudentDatabase {
     required String phone,
     required int id,
   }) {
-    return _db.execute(
-        'update $_studentTable set address = "$address",phone = "$phone" where id = $id');
+    return _db.rawUpdate(
+      'update $_studentTable set address = ?,phone = ? where id = ?',
+      [address, phone, id],
+    );
+  }
+
+  static Future<void> deleteStudent(int id) {
+    return _db.execute("delete from $_studentTable where id = $id");
+  }
+
+  static Future<List<Map<String, Object?>>> getUniqueAddressLit() async {
+    return await _db.rawQuery("select distinct address from $_studentTable");
   }
 }

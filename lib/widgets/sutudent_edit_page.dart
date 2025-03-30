@@ -1,36 +1,48 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:lessoon_storage/models/student_model.dart';
 import 'package:lessoon_storage/storage/student_db.dart';
 
-class StudentForm extends StatefulWidget {
-  const StudentForm({super.key});
-
+class EditStudent extends StatefulWidget {
+  const EditStudent({
+    super.key,
+    required this.studentModel,
+  });
+  final StudentModel studentModel;
   @override
-  State<StudentForm> createState() => _StudentFormState();
+  State<EditStudent> createState() => _EditStudentState();
 }
 
-class _StudentFormState extends State<StudentForm> {
+class _EditStudentState extends State<EditStudent> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _majorController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  Uint8List? _photo;
+  @override
+  void initState() {
+    super.initState();
+    StudentModel studentModel = widget.studentModel;
+    _nameController.text = studentModel.name ?? "";
+    _ageController.text = studentModel.age?.toString() ?? "";
+    _addressController.text = studentModel.address ?? "";
+    _majorController.text = studentModel.major ?? "";
+    _phoneController.text = studentModel.phone ?? "";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         TextField(
+          readOnly: true,
           controller: _nameController,
           decoration: InputDecoration(
             labelText: 'Enter student name',
           ),
         ),
         TextField(
+          readOnly: true,
           controller: _ageController,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
@@ -44,6 +56,7 @@ class _StudentFormState extends State<StudentForm> {
           ),
         ),
         TextField(
+          readOnly: true,
           controller: _majorController,
           decoration: InputDecoration(
             labelText: 'Enter student major',
@@ -56,27 +69,6 @@ class _StudentFormState extends State<StudentForm> {
             labelText: 'Enter student phone',
           ),
         ),
-        TextButton(
-          onPressed: () async {
-            ImagePicker imagePicker = ImagePicker();
-            XFile? file =
-                await imagePicker.pickImage(source: ImageSource.gallery);
-            if (file != null) {
-              File imageFile = File(file.path);
-              Uint8List imageBinary = imageFile.readAsBytesSync();
-              setState(() {
-                _photo = imageBinary;
-              });
-            }
-          },
-          child: Text("Select Image"),
-        ),
-        if (_photo != null)
-          SizedBox(
-            width: 100,
-            height: 100,
-            child: Image.memory(_photo!),
-          ),
         FilledButton(
           onPressed: () async {
             String name = _nameController.text.trim();
@@ -98,13 +90,10 @@ class _StudentFormState extends State<StudentForm> {
                 );
               } else {
                 try {
-                  await StudentDatabase.insertStudent(
-                    name: name,
-                    age: formattedAge,
+                  await StudentDatabase.updateStudent(
+                    id: widget.studentModel.id!,
                     address: address,
-                    major: major,
                     phone: phone,
-                    photo: _photo,
                   );
                   if (context.mounted) {
                     Navigator.pop(context, true);
@@ -123,7 +112,7 @@ class _StudentFormState extends State<StudentForm> {
               );
             }
           },
-          child: Text('Save'),
+          child: Text('Update'),
         )
       ],
     );
