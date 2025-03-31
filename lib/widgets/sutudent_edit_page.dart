@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lessoon_storage/models/student_model.dart';
-import 'package:lessoon_storage/storage/student_db.dart';
+import 'package:lessoon_storage/notifiers/student_database_notifier.dart';
+import 'package:provider/provider.dart';
 
 class EditStudent extends StatefulWidget {
   const EditStudent({
@@ -90,7 +91,8 @@ class _EditStudentState extends State<EditStudent> {
                 );
               } else {
                 try {
-                  await StudentDatabase.updateStudent(
+                  Provider.of<StudentDatabaseNotifier>(context, listen: false)
+                      .updateStudent(
                     id: widget.studentModel.id!,
                     address: address,
                     phone: phone,

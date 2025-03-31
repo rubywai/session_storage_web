@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:lessoon_storage/storage/student_db.dart';
+import 'package:provider/provider.dart';
+
+import '../models/student_model.dart';
+import '../notifiers/student_database_notifier.dart';
 
 class StudentForm extends StatefulWidget {
   const StudentForm({super.key});
@@ -98,13 +101,16 @@ class _StudentFormState extends State<StudentForm> {
                 );
               } else {
                 try {
-                  await StudentDatabase.insertStudent(
-                    name: name,
-                    age: formattedAge,
-                    address: address,
-                    major: major,
-                    phone: phone,
-                    photo: _photo,
+                  Provider.of<StudentDatabaseNotifier>(context, listen: false)
+                      .insertStudent(
+                    StudentModel(
+                      name: name,
+                      age: formattedAge,
+                      address: address,
+                      major: major,
+                      phone: phone,
+                      photo: _photo,
+                    ),
                   );
                   if (context.mounted) {
                     Navigator.pop(context, true);
