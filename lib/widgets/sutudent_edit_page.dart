@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lessoon_storage/models/student_model.dart';
 import 'package:lessoon_storage/notifiers/student_database_notifier.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +23,7 @@ class _EditStudentState extends State<EditStudent> {
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _majorController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  Uint8List? _photo;
   @override
   void initState() {
     super.initState();
@@ -28,6 +33,7 @@ class _EditStudentState extends State<EditStudent> {
     _addressController.text = studentModel.address ?? "";
     _majorController.text = studentModel.major ?? "";
     _phoneController.text = studentModel.phone ?? "";
+    _photo = studentModel.photo;
   }
 
   @override
@@ -70,6 +76,27 @@ class _EditStudentState extends State<EditStudent> {
             labelText: 'Enter student phone',
           ),
         ),
+        TextButton(
+          onPressed: () async {
+            ImagePicker imagePicker = ImagePicker();
+            XFile? file =
+                await imagePicker.pickImage(source: ImageSource.gallery);
+            if (file != null) {
+              File imageFile = File(file.path);
+              Uint8List imageBinary = imageFile.readAsBytesSync();
+              setState(() {
+                _photo = imageBinary;
+              });
+            }
+          },
+          child: Text("Select Image"),
+        ),
+        if (_photo != null)
+          SizedBox(
+            width: 100,
+            height: 100,
+            child: Image.memory(_photo!),
+          ),
         FilledButton(
           onPressed: () async {
             String name = _nameController.text.trim();
@@ -96,6 +123,7 @@ class _EditStudentState extends State<EditStudent> {
                     id: widget.studentModel.id!,
                     address: address,
                     phone: phone,
+                    photo: _photo,
                   );
                   if (context.mounted) {
                     Navigator.pop(context, true);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/student_model.dart';
 import '../storage/student_db.dart';
 
@@ -56,10 +57,12 @@ class StudentDatabaseNotifier extends ChangeNotifier {
     required int id,
     required String address,
     required String phone,
+    Uint8List? photo,
   }) async {
     await StudentDatabase.updateStudent(
       address: address,
       phone: phone,
+      photo: photo,
       id: id,
     );
     getUniqueAddressList();

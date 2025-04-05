@@ -63,10 +63,11 @@ class StudentDatabase {
     required String address,
     required String phone,
     required int id,
+    Uint8List? photo,
   }) {
     return _db.rawUpdate(
-      'update $_studentTable set address = ?,phone = ? where id = ?',
-      [address, phone, id],
+      'update $_studentTable set address = ?,phone = ?, photo= ? where id = ?',
+      [address, phone, photo, id],
     );
   }
 
